@@ -17,8 +17,8 @@
     "url": "git@github.com:kutuluk/loglevel-prefix.git"
   },
   "license": "MIT",
-  "version": "0.1.4",
-  "main": "./dist/main",
+  "version": "0.1.6",
+  "main": "./dist/prefix",
   "babel": {
     "presets": [
       "env"
@@ -29,7 +29,9 @@
   },
   "scripts": {
     "eslint": "eslint lib/prefix.js",
-    "babel": "babel ./lib/prefix.js --out-file ./dist/main.js"
+    "babel": "babel ./lib/prefix.js --out-file ./dist/prefix.js",
+    "uglifyjs": "uglifyjs ./dist/prefix.js -o ./dist/prefix.min.js -c -m reserved=[exports,global,factory,prefix]",
+    "publish": "npm install && npm run babel && npm run uglifyjs && npm publish"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -37,6 +39,7 @@
     "babel-preset-env": "^1.5.1",
     "eslint": "^3.19.0",
     "eslint-config-airbnb-base": "^11.2.0",
-    "eslint-plugin-import": "^2.3.0"
+    "eslint-plugin-import": "^2.3.0",
+    "uglify-js": "^3.0.11"
   }
 }
