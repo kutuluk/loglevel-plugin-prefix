@@ -1,41 +1,41 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['exports'], factory);
+    define(['module', 'exports'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(exports);
+    factory(module, exports);
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports);
+    factory(mod, mod.exports);
     global.prefix = mod.exports;
   }
-})(this, function (exports) {
+})(this, function (module, exports) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  var isGlobal = void 0;
+  var isRoot = void 0;
 
   var prefix = function prefix(logger, options) {
     if (typeof logger.methodFactory !== 'function') {
       throw new TypeError('Argument is not a loglevel object');
     }
 
-    isGlobal = isGlobal === undefined ? typeof logger.getLogger === 'function' : isGlobal;
+    isRoot = isRoot || typeof logger.getLogger === 'function';
     if (typeof logger.getLogger === 'function') {
-      if (!isGlobal) {
+      if (!isRoot) {
         throw new TypeError('You can assign a prefix only to child loggers');
       }
-    } else if (isGlobal) {
+    } else if (isRoot) {
       throw new TypeError('You can assign a prefix only to the root logger');
     }
 
     options = options || {};
     options.format = options.format || '[%t] %l:';
-    options.timestampFormatter = options.timestampFormatter || function () {
-      return new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1');
+    options.timestampFormatter = options.timestampFormatter || function (date) {
+      return date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1');
     };
     options.levelFormatter = options.levelFormatter || function (level) {
       return level.toUpperCase();
@@ -46,26 +46,11 @@
 
     var originalFactory = logger.methodFactory;
     logger.methodFactory = function methodFactory(methodName, logLevel, loggerName) {
-      var _this = this;
-
       var rawMethod = originalFactory(methodName, logLevel, loggerName);
 
-      var hasTimestamp = !(options.format.indexOf('%t') === -1);
-      var hasLevel = !(options.format.indexOf('%l') === -1);
-      var hasName = !(options.format.indexOf('%n') === -1);
-
-      var empty = function empty() {
-        return '';
-      };
-      var printTimestamp = hasTimestamp ? function () {
-        return options.timestampFormatter();
-      } : empty;
-      var printLevel = hasLevel ? function () {
-        return options.levelFormatter(methodName);
-      } : empty;
-      var printName = hasName ? function () {
-        return options.nameFormatter(loggerName);
-      } : empty;
+      var hasTimestamp = options.format.indexOf('%t') !== -1;
+      var hasLevel = options.format.indexOf('%l') !== -1;
+      var hasName = options.format.indexOf('%n') !== -1;
 
       return function () {
         for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -73,11 +58,12 @@
         }
 
         var content = options.format;
-        if (hasTimestamp) content = content.replace(/%t/, printTimestamp());
-        if (hasLevel) content = content.replace(/%l/, printLevel());
-        if (hasName) content = content.replace(/%n/, printName());
+        if (hasTimestamp) content = content.replace(/%t/, options.timestampFormatter(new Date()));
+        if (hasLevel) content = content.replace(/%l/, options.levelFormatter(methodName));
+        if (hasName) content = content.replace(/%n/, options.nameFormatter(loggerName));
+
         args.unshift(content);
-        rawMethod.apply(_this, args);
+        rawMethod.apply(undefined, args);
       };
     };
 
@@ -86,4 +72,5 @@
   };
 
   exports.default = prefix;
+  module.exports = exports['default'];
 });

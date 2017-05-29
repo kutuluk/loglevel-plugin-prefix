@@ -17,24 +17,27 @@
     "url": "git@github.com:kutuluk/loglevel-prefix.git"
   },
   "license": "MIT",
-  "version": "0.1.6",
+  "version": "0.1.9",
   "main": "./dist/prefix",
   "babel": {
     "presets": [
       "env"
     ],
     "plugins": [
+      "add-module-exports",
       "transform-es2015-modules-umd"
     ]
   },
   "scripts": {
     "eslint": "eslint lib/prefix.js",
-    "babel": "babel ./lib/prefix.js --out-file ./dist/prefix.js",
-    "uglifyjs": "uglifyjs ./dist/prefix.js -o ./dist/prefix.min.js -c -m reserved=[exports,global,factory,prefix]",
-    "publish": "npm install && npm run babel && npm run uglifyjs && npm publish"
+    "babel": "babel ./lib/prefix.js --out-file ./dist/loglevel-prefix.js",
+    "uglifyjs": "uglifyjs ./dist/loglevel-prefix.js -o ./dist/loglevel-prefix.min.js -c -m reserved=[prefix]",
+    "build": "npm run babel && npm run uglifyjs",
+    "publish-to-npm": "npm install && npm build && npm publish"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
+    "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
     "babel-preset-env": "^1.5.1",
     "eslint": "^3.19.0",
