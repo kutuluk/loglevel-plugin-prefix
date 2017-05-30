@@ -19,12 +19,14 @@
   var isRoot = void 0;
 
   var prefix = function prefix(logger, options) {
-    if (typeof logger.methodFactory !== 'function') {
+    if (!logger || !logger.methodFactory) {
       throw new TypeError('Argument is not a loglevel object');
     }
 
-    isRoot = isRoot || typeof logger.getLogger === 'function';
-    if (typeof logger.getLogger === 'function') {
+    //  isRoot = isRoot || typeof logger.getLogger === 'function';
+    isRoot = isRoot || !!logger.getLogger;
+    //  if (typeof logger.getLogger === 'function') {
+    if (logger.getLogger) {
       if (!isRoot) {
         throw new TypeError('You can assign a prefix only to child loggers');
       }
