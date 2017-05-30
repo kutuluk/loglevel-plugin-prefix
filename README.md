@@ -7,6 +7,12 @@ Minimal, dependency-free and lightweight (0.9KB minified and gzipped) plugin for
 npm install loglevel-prefix --save
 ```
 
+## API
+
+```javascript
+prefix(loglevel[, options]);
+```
+
 ## Base usage
 
 ES6
@@ -58,7 +64,7 @@ and copy to your project folder
 
 ## Options
 
-Default options
+### Default options
 ```javascript
 options = {
   format: '[%t] %l:',
@@ -73,7 +79,7 @@ Output
 [12:53:46] WARN: prefixed message
 ```
 
-Custom options
+### Custom options
 ```javascript
 import log from 'loglevel';
 import prefix from 'loglevel-prefix';
@@ -95,8 +101,8 @@ Output
 
 ## Root loglevel prefixing
 
-a.js
 ```javascript
+// moduleA.js
 import log from 'loglevel';
 
 export default function () {
@@ -104,17 +110,17 @@ export default function () {
 }
 ```
 
-b.js
 ```javascript
+// moduleB.js
 import log from 'loglevel';
 
 export default function () {
-  log.warn('message from moduleB');
+  log.getLogger('moduleB').warn('message from moduleB');
 }
 ```
 
-c.js
 ```javascript
+// moduleC.js
 import log from 'loglevel';
 import prefix from 'loglevel-prefix';
 
@@ -126,14 +132,14 @@ export default function () {
 }
 ```
 
-main.js
 ```javascript
+// main.js
 import log from 'loglevel';
 import prefix from 'loglevel-prefix';
 
-import a from './a';
-import b from './b';
-import c from './c';
+import a from './moduleA';
+import b from './moduleB';
+import c from './moduleC';
 
 prefix(log, {
   format: '[%t] %l (%n):',
@@ -149,14 +155,14 @@ Output
 ```
 [16:53:46] WARN (root): message from root
 [16:53:46] WARN (root): message from moduleA
-[16:53:46] WARN (root): message from moduleB
+[16:53:46] WARN (moduleB): message from moduleB
 Uncaught TypeError: You can assign a prefix only to the root logger
 ```
 
 ## loglevel.getLogger() prefixing
 
-a.js
 ```javascript
+// moduleA.js
 import loglevel from 'loglevel';
 import prefix from 'loglevel-prefix';
 
@@ -168,8 +174,8 @@ const log = prefix(loglevel.getLogger('moduleA'), {
 log.warn('message from moduleA');
 ```
 
-b.js
 ```javascript
+// moduleB.js
 import loglevel from 'loglevel';
 import prefix from 'loglevel-prefix';
 
@@ -181,21 +187,21 @@ const log = prefix(loglevel.getLogger('moduleB'), {
 log.warn('message from moduleB');
 ```
 
-с.js
 ```javascript
+// moduleC.js
 import log from 'loglevel';
 
 log.warn('message from moduleС');
 ```
 
-main.js
 ```javascript
+// main.js
 import loglevel from 'loglevel';
 import prefix from 'loglevel-prefix';
 
-import './a';
-import './b';
-import './с';
+import './moduleA';
+import './moduleB';
+import './moduleC';
 
 loglevel.warn('message from root');
 

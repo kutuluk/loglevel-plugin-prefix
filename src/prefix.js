@@ -5,7 +5,7 @@ const prefix = function prefix(logger, options) {
     throw new TypeError('Argument is not a loglevel object');
   }
 
-  isRoot = isRoot || !!(logger.getLogger);
+  isRoot = isRoot || !!logger.getLogger;
   if (logger.getLogger) {
     if (!isRoot) {
       throw new TypeError('You can assign a prefix only to child loggers');
