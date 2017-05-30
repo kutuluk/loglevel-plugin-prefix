@@ -162,7 +162,7 @@ import prefix from 'loglevel-prefix';
 
 const log = prefix(loglevel.getLogger('moduleA'), {
   format: '[%t] %l (%n):',
-  dateFormatter: date => date.toISOString(),
+  dateFormatter: date => date.toISOString()
 });
 
 log.warn('message from moduleA');
@@ -175,7 +175,7 @@ import prefix from 'loglevel-prefix';
 
 const log = prefix(loglevel.getLogger('moduleB'), {
   format: '[%t] %l (%n):',
-  dateFormatter: date => date.toISOString(),
+  dateFormatter: date => date.toISOString()
 });
 
 log.warn('message from moduleB');
@@ -193,15 +193,15 @@ main.js
 import loglevel from 'loglevel';
 import prefix from 'loglevel-prefix';
 
-import a from './a';
-import b from './b';
-import с from './с';
+import './a';
+import './b';
+import './с';
 
 loglevel.warn('message from root');
 
 const log = prefix(loglevel.getLogger('main'), {
   format: '[%t] %l (%n):',
-  dateFormatter: date => date.toISOString(),
+  dateFormatter: date => date.toISOString()
 });
 log.warn('message from main');
 
