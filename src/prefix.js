@@ -1,18 +1,15 @@
-let isRoot;
+let isPrefixed = false;
 
 const prefix = function prefix(logger, options) {
-  if (!logger || !logger.methodFactory) {
-    throw new TypeError('Argument is not a loglevel object');
+  if (!logger || !logger.getLogger) {
+    throw new TypeError('Argument is not a root loglevel object');
   }
 
-  isRoot = isRoot || !!logger.getLogger;
-  if (logger.getLogger) {
-    if (!isRoot) {
-      throw new TypeError('You can assign a prefix only to child loggers');
-    }
-  } else if (isRoot) {
-    throw new TypeError('You can assign a prefix only to the root logger');
+  if (isPrefixed) {
+    throw new TypeError('You can assign a prefix only one time');
   }
+
+  isPrefixed = true;
 
   options = options || {};
   options.format = options.format || '[%t] %l:';

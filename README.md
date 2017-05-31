@@ -13,42 +13,13 @@ npm install loglevel-prefix --save
 prefix(loglevel[, options]);
 ```
 
+**loglevel** - root logger object, imported from loglevel package
+
+**options** - configuration object
+
 ## Base usage
 
-ES6
-```javascript
-
-import log from 'loglevel';
-import prefix from 'loglevel-prefix';
-
-prefix(log);
-log.warn('prefixed message');
-
-```
-
-CommonJS
-```javascript
-
-var log = require('loglevel');
-var prefix = require('loglevel-prefix');
-prefix(log);
-
-// or
-// var log = require('loglevel-prefix')(require('loglevel'));
-
-log.warn('prefixed message');
-
-```
-
-AMD
-```javascript
-define(['loglevel', 'loglevel-prefix'], function(log, prefix) {
-  prefix(log);
-  log.warn('prefixed message');
-});
-```
-
-## Browser directly
+### Browser directly
 
 Download [production version](https://raw.githubusercontent.com/kutuluk/loglevel-prefix/master/dist/loglevel-prefix.min.js)
 and copy to your project folder
@@ -62,6 +33,39 @@ and copy to your project folder
 </script>
 ```
 
+### ES6
+```javascript
+
+import log from 'loglevel';
+import prefix from 'loglevel-prefix';
+
+prefix(log);
+log.warn('prefixed message');
+
+```
+
+### CommonJS
+```javascript
+
+var log = require('loglevel');
+var prefix = require('loglevel-prefix');
+prefix(log);
+
+// or
+// var log = require('loglevel-prefix')(require('loglevel'));
+
+log.warn('prefixed message');
+
+```
+
+### AMD
+```javascript
+define(['loglevel', 'loglevel-prefix'], function(log, prefix) {
+  prefix(log);
+  log.warn('prefixed message');
+});
+```
+
 ## Options
 
 ### Default options
@@ -69,7 +73,7 @@ and copy to your project folder
 options = {
   format: '[%t] %l:',
   dateFormatter: date => date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1'),
-  levelFormatter: level => level => level.toUpperCase(),
+  levelFormatter: level => level.toUpperCase(),
   nameFormatter: name => name || 'root'
 }
 ```
@@ -99,7 +103,7 @@ Output
 [2017-05-29T16:53:46.000Z] Warn (global) <static>: prefixed message
 ```
 
-## Root loglevel prefixing
+## Usage
 
 ```javascript
 // moduleA.js
@@ -112,22 +116,20 @@ export default function () {
 
 ```javascript
 // moduleB.js
-import log from 'loglevel';
+import loglevel from 'loglevel';
+const log = loglevel.getLogger('moduleB');
 
 export default function () {
-  log.getLogger('moduleB').warn('message from moduleB');
+  log.warn('message from moduleB');
 }
 ```
 
 ```javascript
 // moduleC.js
-import log from 'loglevel';
-import prefix from 'loglevel-prefix';
+import loglevel from 'loglevel';
 
 export default function () {
-  prefix(log, {
-    format: '[%t] %l (%n) <moduleC>:',
-  });
+  const log = loglevel.getLogger('moduleC');
   log.warn('message from moduleC');
 }
 ```
@@ -141,89 +143,57 @@ import a from './moduleA';
 import b from './moduleB';
 import c from './moduleC';
 
+log.warn('message from root before prefixing');
+
 prefix(log, {
   format: '[%t] %l (%n):',
 });
 
-log.warn('message from root');
+log.warn('message from root after prefixing');
+
 a();
 b();
 c();
+
+prefix(log, {
+  format: '[%t] %l (%n):',
+  dateFormatter: date => date.toISOString()
+});
+
+log.warn('message from root after pre-prefixing');
 ```
 
 Output
 ```
-[16:53:46] WARN (root): message from root
+message from root before prefixing
+[16:53:46] WARN (root): message from root after prefixing
 [16:53:46] WARN (root): message from moduleA
-[16:53:46] WARN (moduleB): message from moduleB
-Uncaught TypeError: You can assign a prefix only to the root logger
+message from moduleB
+[16:53:46] WARN (moduleC): message from moduleC
+Uncaught TypeError: You can assign a prefix only one time
 ```
 
-## loglevel.getLogger() prefixing
-
-```javascript
-// moduleA.js
-import loglevel from 'loglevel';
-import prefix from 'loglevel-prefix';
-
-const log = prefix(loglevel.getLogger('moduleA'), {
-  format: '[%t] %l (%n):',
-  dateFormatter: date => date.toISOString()
-});
-
-log.warn('message from moduleA');
-```
-
-```javascript
-// moduleB.js
-import loglevel from 'loglevel';
-import prefix from 'loglevel-prefix';
-
-const log = prefix(loglevel.getLogger('moduleB'), {
-  format: '[%t] %l (%n):',
-  dateFormatter: date => date.toISOString()
-});
-
-log.warn('message from moduleB');
-```
-
-```javascript
-// moduleC.js
-import log from 'loglevel';
-
-log.warn('message from moduleС');
-```
+### Note
 
 ```javascript
 // main.js
 import loglevel from 'loglevel';
 import prefix from 'loglevel-prefix';
 
-import './moduleA';
-import './moduleB';
-import './moduleC';
-
 loglevel.warn('message from root');
 
-const log = prefix(loglevel.getLogger('main'), {
+const log = loglevel.getLogger('main');
+
+prefix(log, {
   format: '[%t] %l (%n):',
   dateFormatter: date => date.toISOString()
 });
+
 log.warn('message from main');
-
-prefix(loglevel, {
-  format: '[%t] %l (%n):',
-});
-
-loglevel.warn('message from prefixed root');
 ```
 
 Output
 ```
-[2017-05-29T16:53:46.000Z] WARN (moduleA): message from moduleA
-[2017-05-29T16:53:46.000Z] WARN (moduleB): message from moduleB
-[16:53:46] WARN: message from moduleС
-[16:53:46] WARN: message from root
-[2017-05-29T16:53:46.000Z] WARN (main): message from main
-Uncaught TypeError: You can assign a prefix only to child loggers
+message from root
+Uncaught TypeError: Argument is not a root loglevel object
 ```
