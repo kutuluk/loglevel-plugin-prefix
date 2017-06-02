@@ -70,14 +70,35 @@ define(['loglevel', 'loglevel-prefix'], function(log, prefix) {
 
 ### Default options
 ```javascript
-options = {
-  format: '[%t] %l:',
+default_options = {
+  template: '[%t] %l:',
   dateFormatter: date => date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1'),
   levelFormatter: level => level.toUpperCase(),
   nameFormatter: name => name || 'root'
 }
 ```
 
+Plugin formats the prefix using template option as a printf-like format.
+
+The **template** is a string containing zero or more placeholder tokens. Each placeholder token is replaced with the value from loglevel messages parameters. Supported placeholders are:
+
+%t - Timestamp of message.
+
+%l - Level of message.
+
+%n - Name of logger.
+
+The **dateFormatter, levelFormatter, nameFormatter** is a functions for formatting corresponding values
+
+```javascript
+
+import log from 'loglevel';
+import prefix from 'loglevel-prefix';
+
+prefix(log);
+log.warn('prefixed message');
+
+```
 Output
 ```
 [12:53:46] WARN: prefixed message
@@ -89,7 +110,7 @@ import log from 'loglevel';
 import prefix from 'loglevel-prefix';
 
 prefix(log, {
-  format: '[%t] %l (%n) <static>:',
+  template: '[%t] %l (%n) static text:',
   dateFormatter: date => date.toISOString(),
   levelFormatter: level => level.charAt(0).toUpperCase() + level.substr(1),
   nameFormatter: name => name || 'global'
@@ -100,7 +121,7 @@ log.warn('prefixed message');
 
 Output
 ```
-[2017-05-29T16:53:46.000Z] Warn (global) <static>: prefixed message
+[2017-05-29T16:53:46.000Z] Warn (global) static text: prefixed message
 ```
 
 ## Usage
@@ -143,24 +164,17 @@ import a from './moduleA';
 import b from './moduleB';
 import c from './moduleC';
 
-log.warn('message from root before prefixing');
+log.warn('message from root %s prefixing', 'before');
 
 prefix(log, {
-  format: '[%t] %l (%n):',
+  template: '[%t] %l (%n):',
 });
 
-log.warn('message from root after prefixing');
+log.warn('message from root %s prefixing', 'after');
 
 a();
 b();
 c();
-
-prefix(log, {
-  format: '[%t] %l (%n):',
-  dateFormatter: date => date.toISOString()
-});
-
-log.warn('message from root after pre-prefixing');
 ```
 
 Output
@@ -170,30 +184,39 @@ message from root before prefixing
 [16:53:46] WARN (root): message from moduleA
 message from moduleB
 [16:53:46] WARN (moduleC): message from moduleC
-Uncaught TypeError: You can assign a prefix only one time
 ```
 
-### Note
+## Errors
 
 ```javascript
 // main.js
 import loglevel from 'loglevel';
 import prefix from 'loglevel-prefix';
 
-loglevel.warn('message from root');
+prefix(loglevel);
+
+loglevel.warn('message from root after prefixing');
+
+prefix(loglevel, {
+  dateFormatter: date => date.toISOString()
+});
+
+loglevel.warn('message from root after pre-prefixing');
 
 const log = loglevel.getLogger('main');
 
 prefix(log, {
-  format: '[%t] %l (%n):',
-  dateFormatter: date => date.toISOString()
+  template: '[%t] %l (%n):'
 });
 
-log.warn('message from main');
+log.warn('message from child logger');
 ```
 
 Output
 ```
-message from root
+[16:53:46] WARN: message from root after prefixing
+Uncaught TypeError: You can assign a prefix only one time
+[16:53:46] WARN: message from root after pre-prefixing
 Uncaught TypeError: Argument is not a root loglevel object
+[16:53:46] WARN: message from child logger
 ```
