@@ -17,7 +17,7 @@
     "url": "git@github.com:kutuluk/loglevel-prefix.git"
   },
   "license": "MIT",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "main": "./dist/loglevel-prefix",
   "babel": {
     "presets": [

@@ -1,5 +1,5 @@
 # loglevel-prefix
-Minimal, dependency-free and lightweight (0.9KB minified and gzipped) plugin for [loglevel](https://github.com/pimterry/loglevel) message prefixing
+Minimal lightweight (0.9KB minified and gzipped) plugin for [loglevel](https://github.com/pimterry/loglevel) message prefixing
 
 ## Installation
 
@@ -10,12 +10,33 @@ npm install loglevel-prefix --save
 ## API
 
 ```javascript
-prefix(loglevel[, options]);
+prefix(log[, options]);
 ```
 
-**loglevel** - root logger object, imported from loglevel package
+**log** - root logger, imported from loglevel package
 
 **options** - configuration object
+
+```javascript
+default_options = {
+  template: '[%t] %l:',
+  timestampFormatter: date => date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1'),
+  levelFormatter: level => level.toUpperCase(),
+  nameFormatter: name => name || 'root'
+}
+```
+
+Plugin formats the prefix using **template** option as a printf-like format.
+
+The **template** is a string containing zero or more placeholder tokens. Each placeholder token is replaced with the value from loglevel messages parameters. Supported placeholders are:
+
+%t - Timestamp of message.
+
+%l - Level of message.
+
+%n - Name of logger.
+
+The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functions for formatting corresponding values
 
 ## Base usage
 
@@ -33,6 +54,11 @@ and copy to your project folder
 </script>
 ```
 
+Output
+```
+[12:53:46] WARN: prefixed message
+```
+
 ### ES6
 ```javascript
 
@@ -41,7 +67,6 @@ import prefix from 'loglevel-prefix';
 
 prefix(log);
 log.warn('prefixed message');
-
 ```
 
 ### CommonJS
@@ -55,7 +80,6 @@ prefix(log);
 // var log = require('loglevel-prefix')(require('loglevel'));
 
 log.warn('prefixed message');
-
 ```
 
 ### AMD
@@ -66,52 +90,15 @@ define(['loglevel', 'loglevel-prefix'], function(log, prefix) {
 });
 ```
 
-## Options
+## Custom options
 
-### Default options
-```javascript
-default_options = {
-  template: '[%t] %l:',
-  dateFormatter: date => date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1'),
-  levelFormatter: level => level.toUpperCase(),
-  nameFormatter: name => name || 'root'
-}
-```
-
-Plugin formats the prefix using template option as a printf-like format.
-
-The **template** is a string containing zero or more placeholder tokens. Each placeholder token is replaced with the value from loglevel messages parameters. Supported placeholders are:
-
-%t - Timestamp of message.
-
-%l - Level of message.
-
-%n - Name of logger.
-
-The **dateFormatter, levelFormatter, nameFormatter** is a functions for formatting corresponding values
-
-```javascript
-
-import log from 'loglevel';
-import prefix from 'loglevel-prefix';
-
-prefix(log);
-log.warn('prefixed message');
-
-```
-Output
-```
-[12:53:46] WARN: prefixed message
-```
-
-### Custom options
 ```javascript
 import log from 'loglevel';
 import prefix from 'loglevel-prefix';
 
 prefix(log, {
   template: '[%t] %l (%n) static text:',
-  dateFormatter: date => date.toISOString(),
+  timestampFormatter: date => date.toISOString(),
   levelFormatter: level => level.charAt(0).toUpperCase() + level.substr(1),
   nameFormatter: name => name || 'global'
 });
@@ -124,7 +111,7 @@ Output
 [2017-05-29T16:53:46.000Z] Warn (global) static text: prefixed message
 ```
 
-## Usage
+## Example
 
 ```javascript
 // moduleA.js
@@ -137,21 +124,22 @@ export default function () {
 
 ```javascript
 // moduleB.js
-import loglevel from 'loglevel';
-const log = loglevel.getLogger('moduleB');
+import log from 'loglevel';
+
+const logger = log.getLogger('moduleB');
 
 export default function () {
-  log.warn('message from moduleB');
+  logger.warn('message from moduleB');
 }
 ```
 
 ```javascript
 // moduleC.js
-import loglevel from 'loglevel';
+import log from 'loglevel';
 
 export default function () {
-  const log = loglevel.getLogger('moduleC');
-  log.warn('message from moduleC');
+  const logger = log.getLogger('moduleC');
+  logger.warn('message from moduleC');
 }
 ```
 
@@ -190,33 +178,42 @@ message from moduleB
 
 ```javascript
 // main.js
-import loglevel from 'loglevel';
+import log from 'loglevel';
 import prefix from 'loglevel-prefix';
 
-prefix(loglevel);
+log.setLevel('info');
+prefix(log);
 
-loglevel.warn('message from root after prefixing');
+log.info('message from root after prefixing');
 
-prefix(loglevel, {
-  dateFormatter: date => date.toISOString()
-});
+try {
+  prefix(log, {
+    timestampFormatter: date => date.toISOString()
+  });
+} catch(e) {
+  log.error(e);
+};
 
-loglevel.warn('message from root after pre-prefixing');
+log.info('message from root after pre-prefixing');
 
-const log = loglevel.getLogger('main');
+const logger = log.getLogger('main');
 
-prefix(log, {
-  template: '[%t] %l (%n):'
-});
+try {
+  prefix(logger, {
+    template: '[%t] %l (%n):'
+  });
+} catch(e) {
+  logger.error(e);
+};
 
-log.warn('message from child logger');
+logger.info('message from child logger');
 ```
 
 Output
 ```
-[16:53:46] WARN: message from root after prefixing
-Uncaught TypeError: You can assign a prefix only one time
-[16:53:46] WARN: message from root after pre-prefixing
-Uncaught TypeError: Argument is not a root loglevel object
-[16:53:46] WARN: message from child logger
+[16:53:46] INFO: message from root after prefixing
+[16:53:46] ERROR: TypeError: You can assign a prefix only one time
+[16:53:46] INFO: message from root after pre-prefixing
+[16:53:46] ERROR: TypeError: Argument is not a root loglevel object
+[16:53:46] INFO: message from child logger
 ```
