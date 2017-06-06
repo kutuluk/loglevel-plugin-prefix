@@ -1,24 +1,28 @@
 {
-  "name": "loglevel-prefix",
+  "name": "loglevel-plugin-prefix",
   "description": "Plugin for loglevel message prefixing",
   "author": {
     "name": "kutuluk"
   },
   "keywords": [
+    "log",
+    "logger",
+    "logging",
+    "browser",
     "loglevel",
     "loglevel-plugin"
   ],
-  "homepage": "https://github.com/kutuluk/loglevel-prefix",
+  "homepage": "https://github.com/kutuluk/loglevel-plugin-prefix",
   "bugs": {
-    "url": "https://github.com/kutuluk/loglevel-prefix/issues"
+    "url": "https://github.com/kutuluk/loglevel-plugin-prefix/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:kutuluk/loglevel-prefix.git"
+    "url": "git@github.com:kutuluk/loglevel-plugin-prefix.git"
   },
   "license": "MIT",
-  "version": "0.3.1",
-  "main": "./dist/loglevel-prefix",
+  "version": "0.3.2",
+  "main": "./lib/loglevel-plugin-prefix",
   "babel": {
     "presets": [
       "env"
@@ -30,8 +34,8 @@
   },
   "scripts": {
     "eslint": "eslint src/prefix.js",
-    "babel": "babel ./src/prefix.js --out-file ./dist/loglevel-prefix.js",
-    "uglifyjs": "uglifyjs ./dist/loglevel-prefix.js -o ./dist/loglevel-prefix.min.js -c -m reserved=[prefix]",
+    "babel": "babel ./src/prefix.js --out-file ./lib/loglevel-plugin-prefix.js",
+    "uglifyjs": "uglifyjs ./lib/loglevel-plugin-prefix.js -o ./dist/loglevel-plugin-prefix.min.js -c -m reserved=[prefix]",
     "build": "npm run babel && npm run uglifyjs",
     "publish-to-npm": "npm install && npm build && npm publish"
   },

@@ -1,16 +1,16 @@
 # loglevel-prefix
-Minimal lightweight (0.9KB minified and gzipped) plugin for [loglevel](https://github.com/pimterry/loglevel) message prefixing
+Plugin for [loglevel](https://github.com/pimterry/loglevel) message prefixing
 
 ## Installation
 
 ```sh
-npm install loglevel-prefix --save
+npm install loglevel-plugin-prefix --save
 ```
 
 ## API
 
 ```javascript
-prefix(log[, options]);
+apply(log[, options]);
 ```
 
 **log** - root logger, imported from loglevel package
@@ -18,7 +18,7 @@ prefix(log[, options]);
 **options** - configuration object
 
 ```javascript
-default_options = {
+var defaults = {
   template: '[%t] %l:',
   timestampFormatter: date => date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1'),
   levelFormatter: level => level.toUpperCase(),
@@ -42,14 +42,14 @@ The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functi
 
 ### Browser directly
 
-Download [production version](https://raw.githubusercontent.com/kutuluk/loglevel-prefix/master/dist/loglevel-prefix.min.js)
+Download [production version](https://raw.githubusercontent.com/kutuluk/loglevel-plugin-prefix/master/dist/loglevel-plugin-prefix.min.js)
 and copy to your project folder
 ```html
 <script src="loglevel.min.js"></script>
-<script src="loglevel-prefix.min.js"></script>
+<script src="loglevel-plugin-prefix.min.js"></script>
 
 <script>
-  prefix(log);
+  prefix.noConflict().apply(log);
   log.warn('prefixed message');
 </script>
 ```
@@ -63,9 +63,9 @@ Output
 ```javascript
 
 import log from 'loglevel';
-import prefix from 'loglevel-prefix';
+import prefix from 'loglevel-plugin-prefix';
 
-prefix(log);
+prefix.apply(log);
 log.warn('prefixed message');
 ```
 
@@ -73,19 +73,16 @@ log.warn('prefixed message');
 ```javascript
 
 var log = require('loglevel');
-var prefix = require('loglevel-prefix');
-prefix(log);
+var prefix = require('loglevel-plugin-prefix');
 
-// or
-// var log = require('loglevel-prefix')(require('loglevel'));
-
+prefix.apply(log);
 log.warn('prefixed message');
 ```
 
 ### AMD
 ```javascript
-define(['loglevel', 'loglevel-prefix'], function(log, prefix) {
-  prefix(log);
+define(['loglevel', 'loglevel-plugin-prefix'], function(log, prefix) {
+  prefix.apply(log);
   log.warn('prefixed message');
 });
 ```
@@ -94,9 +91,9 @@ define(['loglevel', 'loglevel-prefix'], function(log, prefix) {
 
 ```javascript
 import log from 'loglevel';
-import prefix from 'loglevel-prefix';
+import prefix from 'loglevel-plugin-prefix';
 
-prefix(log, {
+prefix.apply(log, {
   template: '[%t] %l (%n) static text:',
   timestampFormatter: date => date.toISOString(),
   levelFormatter: level => level.charAt(0).toUpperCase() + level.substr(1),
@@ -146,7 +143,7 @@ export default function () {
 ```javascript
 // main.js
 import log from 'loglevel';
-import prefix from 'loglevel-prefix';
+import prefix from 'loglevel-plugin-prefix';
 
 import a from './moduleA';
 import b from './moduleB';
@@ -154,7 +151,7 @@ import c from './moduleC';
 
 log.warn('message from root %s prefixing', 'before');
 
-prefix(log, {
+prefix.apply(log, {
   template: '[%t] %l (%n):',
 });
 
@@ -177,31 +174,26 @@ message from moduleB
 ## Errors
 
 ```javascript
-// main.js
 import log from 'loglevel';
-import prefix from 'loglevel-prefix';
+import prefix from 'loglevel-plugin-prefix';
 
 log.setLevel('info');
-prefix(log);
+prefix.apply(log);
 
 log.info('message from root after prefixing');
 
 try {
-  prefix(log, {
-    timestampFormatter: date => date.toISOString()
-  });
+  prefix.apply(log, { timestampFormatter: date => date.toISOString() });
 } catch(e) {
   log.error(e);
 };
 
 log.info('message from root after pre-prefixing');
 
-const logger = log.getLogger('main');
+const logger = log.getLogger('child');
 
 try {
-  prefix(logger, {
-    template: '[%t] %l (%n):'
-  });
+  prefix.apply(logger, { template: '[%t] %l (%n):' });
 } catch(e) {
   logger.error(e);
 };

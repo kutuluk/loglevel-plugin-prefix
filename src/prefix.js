@@ -1,6 +1,24 @@
 let isAssigned = false;
 
-const prefix = function prefix(logger, options) {
+const merge = function merge(target) {
+  for (let i = 1; i < arguments.length; i += 1) {
+    for (const prop in arguments[i]) {
+      if (Object.prototype.hasOwnProperty.call(arguments[i], prop)) {
+        target[prop] = arguments[i][prop];
+      }
+    }
+  }
+  return target;
+};
+
+const defaults = {
+  template: '[%t] %l:',
+  timestampFormatter: date => date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1'),
+  levelFormatter: level => level.toUpperCase(),
+  nameFormatter: name => name || 'root',
+};
+
+const apply = function apply(logger, options) {
   if (!logger || !logger.getLogger) {
     throw new TypeError('Argument is not a root loglevel object');
   }
@@ -11,13 +29,7 @@ const prefix = function prefix(logger, options) {
 
   isAssigned = true;
 
-  options = options || {};
-  options.template = options.template || '[%t] %l:';
-  options.timestampFormatter =
-    options.timestampFormatter ||
-    (date => date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1'));
-  options.levelFormatter = options.levelFormatter || (level => level.toUpperCase());
-  options.nameFormatter = options.nameFormatter || (name => name || 'root');
+  options = merge({}, defaults, options);
 
   const originalFactory = logger.methodFactory;
   logger.methodFactory = function methodFactory(methodName, logLevel, loggerName) {
@@ -45,6 +57,18 @@ const prefix = function prefix(logger, options) {
 
   logger.setLevel(logger.getLevel());
   return logger;
+};
+
+const prefix = {};
+prefix.apply = apply;
+prefix.name = 'loglevel-plugin-prefix';
+
+const savePrefix = window ? window.prefix : undefined;
+prefix.noConflict = () => {
+  if (window && window.prefix === prefix) {
+    window.prefix = savePrefix;
+  }
+  return prefix;
 };
 
 export default prefix;
