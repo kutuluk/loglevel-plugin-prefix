@@ -1,4 +1,4 @@
-# loglevel-prefix
+# loglevel-plugin-prefix
 Plugin for [loglevel](https://github.com/pimterry/loglevel) message prefixing
 
 ## Installation
