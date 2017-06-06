@@ -30,11 +30,9 @@ Plugin formats the prefix using **template** option as a printf-like format.
 
 The **template** is a string containing zero or more placeholder tokens. Each placeholder token is replaced with the value from loglevel messages parameters. Supported placeholders are:
 
-%t - Timestamp of message.
-
-%l - Level of message.
-
-%n - Name of logger.
+- %t - timestamp of message
+- %l - level of message
+- %n - name of logger
 
 The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functions for formatting corresponding values
 
@@ -49,8 +47,9 @@ and copy to your project folder
 <script src="loglevel-plugin-prefix.min.js"></script>
 
 <script>
-  prefix.noConflict().apply(log);
-  log.warn('prefixed message');
+  var logger = log.noConflict();
+  prefix.noConflict().apply(logger);
+  logger.warn('prefixed message');
 </script>
 ```
 
