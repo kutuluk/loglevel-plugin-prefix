@@ -21,7 +21,7 @@
     "url": "git@github.com:kutuluk/loglevel-plugin-prefix.git"
   },
   "license": "MIT",
-  "version": "0.3.2",
+  "version": "0.4.1",
   "main": "./lib/loglevel-plugin-prefix",
   "babel": {
     "presets": [
@@ -37,7 +37,7 @@
     "babel": "babel ./src/prefix.js --out-file ./lib/loglevel-plugin-prefix.js",
     "uglifyjs": "uglifyjs ./lib/loglevel-plugin-prefix.js -o ./dist/loglevel-plugin-prefix.min.js -c -m reserved=[prefix]",
     "build": "npm run babel && npm run uglifyjs",
-    "publish-to-npm": "npm install && npm build && npm publish"
+    "publish-to-npm": "npm install && npm run build && npm publish"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
