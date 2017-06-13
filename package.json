@@ -21,7 +21,7 @@
     "url": "git@github.com:kutuluk/loglevel-plugin-prefix.git"
   },
   "license": "MIT",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "main": "./lib/loglevel-plugin-prefix",
   "babel": {
     "presets": [
@@ -34,6 +34,7 @@
   },
   "scripts": {
     "eslint": "eslint src/prefix.js",
+    "test": "mocha",
     "babel": "babel ./src/prefix.js --out-file ./lib/loglevel-plugin-prefix.js",
     "uglifyjs": "uglifyjs ./lib/loglevel-plugin-prefix.js -o ./dist/loglevel-plugin-prefix.min.js -c -m reserved=[prefix]",
     "build": "npm run babel && npm run uglifyjs",
@@ -44,9 +45,15 @@
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
     "babel-preset-env": "^1.5.1",
+    "chai": "^4.0.2",
     "eslint": "^3.19.0",
     "eslint-config-airbnb-base": "^11.2.0",
+    "eslint-plugin-chai-friendly": "^0.3.6",
     "eslint-plugin-import": "^2.3.0",
+    "loglevel": "^1.4.1",
+    "loglevel-plugin-mock": "^0.1.0",
+    "mocha": "^3.4.2",
+    "sinon": "^2.3.2",
     "uglify-js": "^3.0.11"
   }
 }

@@ -13,6 +13,8 @@ npm install loglevel-plugin-prefix --save
 apply(log[, options]);
 ```
 
+This method applies the plugin to the logger.
+
 **log** - root logger, imported from loglevel package
 
 **options** - configuration object
@@ -36,6 +38,12 @@ The **template** is a string containing zero or more placeholder tokens. Each pl
 
 The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functions for formatting corresponding values
 
+```javascript
+disable();
+```
+
+This method cancels the effect of the plugin.
+
 ## Base usage
 
 ### Browser directly
@@ -48,19 +56,19 @@ and copy to your project folder
 
 <script>
   var logger = log.noConflict();
-  prefix.noConflict().apply(logger);
+  var prefixer = prefix.noConflict();
+  prefixer.apply(logger);
   logger.warn('prefixed message');
 </script>
 ```
 
 Output
 ```
-[12:53:46] WARN: prefixed message
+[16:53:46] WARN: prefixed message
 ```
 
 ### ES6
 ```javascript
-
 import log from 'loglevel';
 import prefix from 'loglevel-plugin-prefix';
 
@@ -70,7 +78,6 @@ log.warn('prefixed message');
 
 ### CommonJS
 ```javascript
-
 var log = require('loglevel');
 var prefix = require('loglevel-plugin-prefix');
 
@@ -89,14 +96,14 @@ define(['loglevel', 'loglevel-plugin-prefix'], function(log, prefix) {
 ## Custom options
 
 ```javascript
-import log from 'loglevel';
-import prefix from 'loglevel-plugin-prefix';
+var log = require('loglevel');
+var prefix = require('loglevel-plugin-prefix');
 
 prefix.apply(log, {
   template: '[%t] %l (%n) static text:',
-  timestampFormatter: date => date.toISOString(),
-  levelFormatter: level => level.charAt(0).toUpperCase() + level.substr(1),
-  nameFormatter: name => name || 'global'
+  timestampFormatter: function (date) { return date.toISOString() },
+  levelFormatter: function (level) { return level.charAt(0).toUpperCase() + level.substr(1) },
+  nameFormatter: function (name) { return name || 'global' }
 });
 
 log.warn('prefixed message');
@@ -104,61 +111,70 @@ log.warn('prefixed message');
 
 Output
 ```
-[2017-05-29T16:53:46.000Z] Warn (global) static text: prefixed message
+[2017-05-29T12:53:46.000Z] Warn (global) static text: prefixed message
 ```
 
 ## Example
 
 ```javascript
 // moduleA.js
-import log from 'loglevel';
+var log = require('loglevel');
 
-export default function () {
+module.exports = function () {
   log.warn('message from moduleA');
 }
 ```
 
 ```javascript
 // moduleB.js
-import log from 'loglevel';
+var log = require('loglevel');
 
-const logger = log.getLogger('moduleB');
+var logger = log.getLogger('moduleB');
 
-export default function () {
+module.exports = function () {
   logger.warn('message from moduleB');
 }
 ```
 
 ```javascript
 // moduleC.js
-import log from 'loglevel';
+var log = require('loglevel');
 
-export default function () {
-  const logger = log.getLogger('moduleC');
+module.exports = function () {
+  var logger = log.getLogger('moduleC');
   logger.warn('message from moduleC');
 }
 ```
 
 ```javascript
 // main.js
-import log from 'loglevel';
-import prefix from 'loglevel-plugin-prefix';
+var log = require('loglevel');
+var prefix = require('loglevel-plugin-prefix');
 
-import a from './moduleA';
-import b from './moduleB';
-import c from './moduleC';
+var a = require('./moduleA');
+var b = require('./moduleB');
+var c = require('./moduleC');
 
 log.warn('message from root %s prefixing', 'before');
 
-prefix.apply(log, {
-  template: '[%t] %l (%n):',
-});
+prefix.apply(log, { template: '[%t] %l (%n):' });
 
 log.warn('message from root %s prefixing', 'after');
 
 a();
 b();
 c();
+
+prefix.apply(log, {
+  template: '[%t] %l:',
+  timestampFormatter: function (date) { return date.toISOString() }
+});
+
+log.warn('message from root after reapplying');
+
+prefix.disable();
+
+log.warn('message from root after disabling');
 ```
 
 Output
@@ -168,28 +184,42 @@ message from root before prefixing
 [16:53:46] WARN (root): message from moduleA
 message from moduleB
 [16:53:46] WARN (moduleC): message from moduleC
+[2017-05-29T12:53:46.000Z] WARN: message from root after reapplying
+message from root after disabling
 ```
 
 ## Errors
 
 ```javascript
-import log from 'loglevel';
-import prefix from 'loglevel-plugin-prefix';
+var log = require('loglevel');
+var prefix = require('loglevel-plugin-prefix');
+var mock = require('loglevel-plugin-mock');
 
-log.setLevel('info');
+log.enableAll();
+
 prefix.apply(log);
-
 log.info('message from root after prefixing');
 
+prefix.apply(log, { timestampFormatter: function (date) { return date.toISOString() } });
+log.info('message from root after pre-prefixing');
+
+mock.apply(log);
+
 try {
-  prefix.apply(log, { timestampFormatter: date => date.toISOString() });
+  prefix.apply(log, { template: '[%t] %l (%n):' });
 } catch(e) {
   log.error(e);
 };
 
-log.info('message from root after pre-prefixing');
+try {
+  prefix.disable();
+} catch(e) {
+  log.error(e);
+};
 
-const logger = log.getLogger('child');
+mock.disable();
+
+var logger = log.getLogger('child');
 
 try {
   prefix.apply(logger, { template: '[%t] %l (%n):' });
@@ -198,13 +228,15 @@ try {
 };
 
 logger.info('message from child logger');
+
 ```
 
 Output
 ```
 [16:53:46] INFO: message from root after prefixing
-[16:53:46] ERROR: TypeError: You can assign a prefix only one time
-[16:53:46] INFO: message from root after pre-prefixing
-[16:53:46] ERROR: TypeError: Argument is not a root loglevel object
-[16:53:46] INFO: message from child logger
+[2017-05-29T12:53:46.000Z] INFO: message from root after pre-prefixing
+[2017-05-29T12:53:46.000Z] ERROR: Error: You can't reassign a plugin after appling another plugin
+[2017-05-29T12:53:46.000Z] ERROR: Error: You can't disable a plugin after appling another plugin
+[2017-05-29T12:53:46.000Z] ERROR: TypeError: Argument is not a root loglevel object
+[2017-05-29T12:53:46.000Z] INFO: message from child logger
 ```

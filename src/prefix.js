@@ -1,5 +1,3 @@
-let isAssigned = false;
-
 const merge = function merge(target) {
   for (let i = 1; i < arguments.length; i += 1) {
     for (const prop in arguments[i]) {
@@ -18,21 +16,26 @@ const defaults = {
   nameFormatter: name => name || 'root',
 };
 
+let loglevel;
+let originalFactory;
+let pluginFactory;
+
 const apply = function apply(logger, options) {
   if (!logger || !logger.getLogger) {
     throw new TypeError('Argument is not a root loglevel object');
   }
 
-  if (isAssigned) {
-    throw new TypeError('You can assign a prefix only one time');
+  if (loglevel && pluginFactory !== logger.methodFactory) {
+    throw new Error("You can't reassign a plugin after appling another plugin");
   }
 
-  isAssigned = true;
+  loglevel = logger;
 
   options = merge({}, defaults, options);
 
-  const originalFactory = logger.methodFactory;
-  logger.methodFactory = function methodFactory(methodName, logLevel, loggerName) {
+  originalFactory = originalFactory || logger.methodFactory;
+
+  pluginFactory = function methodFactory(methodName, logLevel, loggerName) {
     const rawMethod = originalFactory(methodName, logLevel, loggerName);
 
     const hasTimestamp = options.template.indexOf('%t') !== -1;
@@ -55,18 +58,35 @@ const apply = function apply(logger, options) {
     };
   };
 
+  logger.methodFactory = pluginFactory;
   logger.setLevel(logger.getLevel());
   return logger;
 };
 
+const disable = function disable() {
+  if (!loglevel) {
+    throw new Error("You can't disable a not appled plugin");
+  }
+
+  if (pluginFactory !== loglevel.methodFactory) {
+    throw new Error("You can't disable a plugin after appling another plugin");
+  }
+
+  loglevel.methodFactory = originalFactory;
+  loglevel.setLevel(loglevel.getLevel());
+  originalFactory = undefined;
+  loglevel = undefined;
+};
+
 const prefix = {};
 prefix.apply = apply;
-prefix.name = 'loglevel-plugin-prefix';
+prefix.disable = disable;
 
-const savePrefix = window ? window.prefix : undefined;
+const save = typeof window !== 'undefined' ? window.prefix : undefined;
+
 prefix.noConflict = () => {
-  if (window && window.prefix === prefix) {
-    window.prefix = savePrefix;
+  if (typeof window !== 'undefined' && window.prefix === prefix) {
+    window.prefix = save;
   }
   return prefix;
 };
