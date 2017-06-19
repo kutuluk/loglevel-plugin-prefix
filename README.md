@@ -53,12 +53,9 @@ This method cancels the effect of the plugin.
 ## Base usage
 
 ### Browser directly
-
-Download [production version](https://raw.githubusercontent.com/kutuluk/loglevel-plugin-prefix/master/dist/loglevel-plugin-prefix.min.js)
-and copy to your project folder
 ```html
-<script src="loglevel.min.js"></script>
-<script src="loglevel-plugin-prefix.min.js"></script>
+<script src="https://unpkg.com/loglevel/dist/loglevel.min.js"></script>
+<script src="https://unpkg.com/loglevel-plugin-prefix/dist/loglevel-plugin-prefix.min.js"></script>
 
 <script>
   var logger = log.noConflict();
