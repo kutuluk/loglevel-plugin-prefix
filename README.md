@@ -22,13 +22,13 @@ This method applies the plugin to the logger.
 ```javascript
 var defaults = {
   template: '[%t] %l:',
-  timestampFormatter: function timestampFormatter(date) {
+  timestampFormatter: function (date) {
     return date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1');
   },
-  levelFormatter: function levelFormatter(level) {
+  levelFormatter: function (level) {
     return level.toUpperCase();
   },
-  nameFormatter: function nameFormatter(name) {
+  nameFormatter: function (name) {
     return name || 'root';
   }
 };
