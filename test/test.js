@@ -26,6 +26,7 @@ describe('', () => {
     it('Methods', () => {
       expect(prefix).to.have.property('apply').with.be.a('function');
       expect(prefix).to.have.property('disable').with.be.a('function');
+      expect(prefix).not.to.have.property('noConflict');
     });
 
     it('Empty arguments', () => {

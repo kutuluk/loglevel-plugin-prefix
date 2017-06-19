@@ -22,10 +22,16 @@ This method applies the plugin to the logger.
 ```javascript
 var defaults = {
   template: '[%t] %l:',
-  timestampFormatter: date => date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1'),
-  levelFormatter: level => level.toUpperCase(),
-  nameFormatter: name => name || 'root'
-}
+  timestampFormatter: function timestampFormatter(date) {
+    return date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1');
+  },
+  levelFormatter: function levelFormatter(level) {
+    return level.toUpperCase();
+  },
+  nameFormatter: function nameFormatter(name) {
+    return name || 'root';
+  }
+};
 ```
 
 Plugin formats the prefix using **template** option as a printf-like format.

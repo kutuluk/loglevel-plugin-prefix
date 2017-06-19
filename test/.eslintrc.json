@@ -1,13 +1,15 @@
 {
+    "extends": "airbnb-base",
     "plugins": [
         "chai-friendly"
     ],
     "env": {
-        "mocha": true
+        "mocha": true,
+        "es6": true
     },
     "rules": {
-        "no-unused-expressions": 0,
+        "no-unused-expressions": "off",
         "chai-friendly/no-unused-expressions": 2,
-        "comma-dangle": 0
+        "comma-dangle": "off"
     }
 }
