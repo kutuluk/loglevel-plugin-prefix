@@ -22,7 +22,7 @@
     "url": "git@github.com:kutuluk/loglevel-plugin-prefix.git"
   },
   "license": "MIT",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "main": "./lib/loglevel-plugin-prefix",
   "scripts": {
     "eslint": "eslint ./lib/loglevel-plugin-prefix.js",
@@ -31,14 +31,14 @@
     "build": "npm install && npm run eslint && npm run test && npm run uglifyjs"
   },
   "devDependencies": {
-    "chai": "^4.0.2",
+    "chai": "^4.1.2",
     "eslint": "^3.19.0",
-    "eslint-config-airbnb-base": "^11.2.0",
+    "eslint-config-airbnb-base": "^11.3.2",
     "eslint-plugin-chai-friendly": "^0.3.6",
-    "loglevel": "^1.4.1",
+    "loglevel": "^1.6.0",
     "loglevel-plugin-mock": "^0.1.0",
-    "mocha": "^3.4.2",
-    "sinon": "^2.3.2",
-    "uglify-js": "^3.0.11"
+    "mocha": "^3.5.3",
+    "sinon": "^2.4.1",
+    "uglify-js": "^3.3.4"
   }
 }

@@ -15,7 +15,7 @@ apply(log[, options]);
 
 This method applies the plugin to the logger.
 
-**log** - root logger, imported from loglevel package
+**log** - loglevel logger
 
 **options** - configuration object
 
@@ -43,12 +43,6 @@ The **template** is a string containing zero or more placeholder tokens. Each pl
 - %n - name of logger
 
 The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functions for formatting corresponding values
-
-```javascript
-disable();
-```
-
-This method cancels the effect of the plugin.
 
 ## Base usage
 
@@ -174,10 +168,6 @@ prefix.apply(log, {
 });
 
 log.warn('message from root after reapplying');
-
-prefix.disable();
-
-log.warn('message from root after disabling');
 ```
 
 Output
@@ -188,58 +178,4 @@ message from root before prefixing
 message from moduleB
 [16:53:46] WARN (moduleC): message from moduleC
 [2017-05-29T12:53:46.000Z] WARN: message from root after reapplying
-message from root after disabling
-```
-
-## Errors
-
-```javascript
-var log = require('loglevel');
-var prefix = require('loglevel-plugin-prefix');
-var mock = require('loglevel-plugin-mock');
-
-log.enableAll();
-
-prefix.apply(log);
-log.info('message from root after prefixing');
-
-prefix.apply(log, { timestampFormatter: function (date) { return date.toISOString() } });
-log.info('message from root after pre-prefixing');
-
-mock.apply(log);
-
-try {
-  prefix.apply(log, { template: '[%t] %l (%n):' });
-} catch(e) {
-  log.error(e);
-};
-
-try {
-  prefix.disable();
-} catch(e) {
-  log.error(e);
-};
-
-mock.disable();
-
-var logger = log.getLogger('child');
-
-try {
-  prefix.apply(logger, { template: '[%t] %l (%n):' });
-} catch(e) {
-  logger.error(e);
-};
-
-logger.info('message from child logger');
-
-```
-
-Output
-```
-[16:53:46] INFO: message from root after prefixing
-[2017-05-29T12:53:46.000Z] INFO: message from root after pre-prefixing
-[2017-05-29T12:53:46.000Z] ERROR: Error: You can't reassign a plugin after appling another plugin
-[2017-05-29T12:53:46.000Z] ERROR: Error: You can't disable a plugin after appling another plugin
-[2017-05-29T12:53:46.000Z] ERROR: TypeError: Argument is not a root loglevel object
-[2017-05-29T12:53:46.000Z] INFO: message from child logger
 ```
