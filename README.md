@@ -1,21 +1,24 @@
 # loglevel-plugin-prefix
-Plugin for [loglevel](https://github.com/pimterry/loglevel) message prefixing
+
+Plugin for [loglevel](https://github.com/pimterry/loglevel) message prefixing.
+
+[![NPM version](https://img.shields.io/npm/v/loglevel-plugin-prefix.svg?style=flat-square)](https://www.npmjs.com/package/loglevel-plugin-prefix)[![Build Status](https://img.shields.io/travis/kutuluk/loglevel-plugin-prefix/master.svg?style=flat-square)](https://travis-ci.org/kutuluk/loglevel-plugin-prefix)
 
 ## Installation
 
 ```sh
-npm install loglevel-plugin-prefix --save
+npm i loglevel-plugin-prefix --save
 ```
 
 ## API
 
-```javascript
-apply(log[, options]);
-```
+**This plugin is under active development and should be considered as an unstable. No guarantees regarding API stability are made. Backward compatibility is guaranteed only by path releases.**
+
+#### ```apply(logger, options)```
 
 This method applies the plugin to the logger.
 
-**log** - loglevel logger
+**logger** - loglevel logger
 
 **options** - configuration object
 
@@ -44,12 +47,24 @@ The **template** is a string containing zero or more placeholder tokens. Each pl
 
 The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functions for formatting corresponding values
 
-## Base usage
+
+Alternatively, you can use **format** option. This is a function with two arguments (level and logger), which should return a prefix string. For example,
+
+```javascript
+function simpleFormat(level, logger) {
+    return level + " (" + logger + "):";
+}
+```
+
+
+If the format function is present, the other options are ignored.
+
+## Usage
 
 ### Browser directly
 ```html
 <script src="https://unpkg.com/loglevel/dist/loglevel.min.js"></script>
-<script src="https://unpkg.com/loglevel-plugin-prefix/dist/loglevel-plugin-prefix.min.js"></script>
+<script src="https://unpkg.com/loglevel-plugin-prefix@^0.7/dist/loglevel-plugin-prefix.min.js"></script>
 
 <script>
   var logger = log.noConflict();

@@ -22,7 +22,7 @@
     "url": "git@github.com:kutuluk/loglevel-plugin-prefix.git"
   },
   "license": "MIT",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "main": "./lib/loglevel-plugin-prefix",
   "scripts": {
     "eslint": "eslint ./lib/loglevel-plugin-prefix.js",
@@ -35,6 +35,7 @@
     "eslint": "^3.19.0",
     "eslint-config-airbnb-base": "^11.3.2",
     "eslint-plugin-chai-friendly": "^0.3.6",
+    "eslint-plugin-import": "^2.8.0",
     "loglevel": "^1.6.0",
     "loglevel-plugin-mock": "^0.1.0",
     "mocha": "^3.5.3",
