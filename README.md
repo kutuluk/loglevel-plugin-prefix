@@ -48,16 +48,7 @@ The **template** is a string containing zero or more placeholder tokens. Each pl
 The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functions for formatting corresponding values
 
 
-Alternatively, you can use **format** option. This is a function with two arguments (level and logger), which should return a prefix string. For example,
-
-```javascript
-function simpleFormat(level, logger) {
-    return level + " (" + logger + "):";
-}
-```
-
-
-If the format function is present, the other options are ignored.
+Alternatively, you can use **format** option. This is a function with two arguments (level and logger), which should return a prefix string. If the format option is present, the other options are ignored.
 
 ## Usage
 
@@ -108,22 +99,36 @@ define(['loglevel', 'loglevel-plugin-prefix'], function(log, prefix) {
 ## Custom options
 
 ```javascript
-var log = require('loglevel');
-var prefix = require('loglevel-plugin-prefix');
+const log = require('loglevel');
+const prefix = require('loglevel-plugin-prefix');
+
+log.enableAll();
 
 prefix.apply(log, {
   template: '[%t] %l (%n) static text:',
-  timestampFormatter: function (date) { return date.toISOString() },
-  levelFormatter: function (level) { return level.charAt(0).toUpperCase() + level.substr(1) },
-  nameFormatter: function (name) { return name || 'global' }
+  timestampFormatter(date) { return date.toISOString() },
+  levelFormatter(level) { return level.toUpperCase() },
+  nameFormatter(name) { return name || 'global' }
 });
 
-log.warn('prefixed message');
+log.info('%s prefix', 'template');
+
+const fn = (level, logger) => {
+  const timestamp = new Date().toISOString();
+  const label = level.toUpperCase();
+  const name = logger || 'global';
+  return `[${timestamp}] ${label} (${name}) static text:`;
+};
+
+prefix.apply(log, { format: fn });
+
+log.info('%s prefix', 'functional');
 ```
 
 Output
 ```
-[2017-05-29T12:53:46.000Z] Warn (global) static text: prefixed message
+[2017-05-29T12:53:46.000Z] INFO (global) static text: template prefix
+[2017-05-29T12:53:46.000Z] INFO (global) static text: functional prefix
 ```
 
 ## Example

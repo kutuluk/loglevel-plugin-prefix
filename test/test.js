@@ -25,19 +25,19 @@ describe('API', () => {
 
 describe('Prefix', () => {
   other.apply(loglevel, { method: spy });
-  const child = loglevel.getLogger('child');
-  child.enableAll();
 
   beforeEach(() => {
     spy.reset();
   });
 
-  it('Applying', () => {
+  it('Root applying', () => {
     expect(() => prefix.apply(loglevel)).to.not.throw();
   });
 
-  it('Reapplying', () => {
-    expect(() => prefix.apply(loglevel)).to.not.throw();
+  it('Root reapplyng', () => {
+    prefix.apply(loglevel, { template: '%l (%n):' });
+    loglevel.info('test');
+    expect(spy.calledWith('INFO (root): test')).to.be.true;
   });
 
   it('Format', () => {
@@ -48,6 +48,21 @@ describe('Prefix', () => {
     loglevel.info('test');
 
     expect(spy.calledWith('info (undefined): test')).to.be.true;
+  });
+
+  it('Unformat', () => {
+    prefix.apply(loglevel, { template: '%l:' });
+
+    loglevel.info('test');
+
+    expect(spy.calledWith('INFO: test')).to.be.true;
+  });
+
+  it('The prefix must be combined with the first argument, if it is a string', () => {
+    prefix.apply(loglevel, { template: '%l:' });
+
+    loglevel.info('foo %s', 'bar');
+    expect(spy.calledWith('INFO: foo %s', 'bar')).to.be.true;
   });
 
   it('All methods of the previous plugin should be called', () => {
@@ -61,13 +76,15 @@ describe('Prefix', () => {
     expect(spy.callCount).to.equal(5);
   });
 
-  it('Child logger', () => {
+  it('Child applying', () => {
+    const child = loglevel.getLogger('child');
     prefix.apply(child, { template: '%l (%n):' });
     child.info('test');
     expect(spy.calledWith('INFO (child): test')).to.be.true;
   });
 
   it('Child reapplyng', () => {
+    const child = loglevel.getLogger('child');
     prefix.apply(child, {
       levelFormatter(level) {
         return level;
@@ -75,18 +92,5 @@ describe('Prefix', () => {
     });
     child.info('test');
     expect(spy.calledWith('info (child): test')).to.be.true;
-  });
-
-  it('Root reapplyng', () => {
-    prefix.apply(loglevel, { template: '%l (%n):' });
-    loglevel.info('test');
-    expect(spy.calledWith('INFO (root): test')).to.be.true;
-  });
-
-  it('The prefix must be combined with the first argument, if it is a string', () => {
-    prefix.apply(loglevel, { template: '%l:' });
-
-    loglevel.warn('foo %s', 'bar');
-    expect(spy.calledWith('WARN: foo %s', 'bar')).to.be.true;
   });
 });
