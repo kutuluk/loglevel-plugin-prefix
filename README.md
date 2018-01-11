@@ -14,13 +14,15 @@ npm i loglevel-plugin-prefix --save
 
 **This plugin is under active development and should be considered as an unstable. No guarantees regarding API stability are made. Backward compatibility is guaranteed only by path releases.**
 
-#### ```apply(logger, options)```
+#### `apply(logger, options)`
 
 This method applies the plugin to the logger.
 
-**logger** - loglevel logger
+#### Parameters
 
-**options** - configuration object
+`logger` - a loglevel logger
+
+`options` - an optional configuration object
 
 ```javascript
 var defaults = {
@@ -37,16 +39,13 @@ var defaults = {
 };
 ```
 
-Plugin formats the prefix using **template** option as a printf-like format.
+Plugin formats the prefix using **template** option as a printf-like format. The **template** is a string containing zero or more placeholder tokens. Each placeholder token is replaced with the value from loglevel messages parameters. Supported placeholders are:
 
-The **template** is a string containing zero or more placeholder tokens. Each placeholder token is replaced with the value from loglevel messages parameters. Supported placeholders are:
+- `%t` - timestamp of message
+- `%l` - level of message
+- `%n` - name of logger
 
-- %t - timestamp of message
-- %l - level of message
-- %n - name of logger
-
-The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functions for formatting corresponding values
-
+The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functions for formatting corresponding values.
 
 Alternatively, you can use **format** option. This is a function with two arguments (level and logger), which should return a prefix string. If the format option is present, the other options are ignored.
 
@@ -99,8 +98,8 @@ define(['loglevel', 'loglevel-plugin-prefix'], function(log, prefix) {
 ## Custom options
 
 ```javascript
-const log = require('loglevel');
-const prefix = require('loglevel-plugin-prefix');
+import log from 'loglevel';
+import prefix from 'loglevel-plugin-prefix';
 
 log.enableAll();
 
@@ -131,71 +130,55 @@ Output
 [2017-05-29T12:53:46.000Z] INFO (global) static text: functional prefix
 ```
 
-## Example
+## Option inheritance
 
 ```javascript
-// moduleA.js
-var log = require('loglevel');
+import log from 'loglevel';
+import prefix from 'loglevel-plugin-prefix';
 
-module.exports = function () {
-  log.warn('message from moduleA');
-}
-```
+log.enableAll();
 
-```javascript
-// moduleB.js
-var log = require('loglevel');
+log.info('root');
 
-var logger = log.getLogger('moduleB');
+const chicken = log.getLogger('chicken');
+prefix.apply(chicken, { template: '%l (%n):' });
+chicken.info('chicken');
 
-module.exports = function () {
-  logger.warn('message from moduleB');
-}
-```
+prefix.apply(log);
+log.info('root');
 
-```javascript
-// moduleC.js
-var log = require('loglevel');
+const egg = log.getLogger('egg');
+prefix.apply(egg);
+egg.info('egg');
 
-module.exports = function () {
-  var logger = log.getLogger('moduleC');
-  logger.warn('message from moduleC');
-}
-```
+const fn = (level, logger) => {
+  const label = level.toUpperCase();
+  const name = logger || 'root';
+  return `${label} (${name}):`;
+};
 
-```javascript
-// main.js
-var log = require('loglevel');
-var prefix = require('loglevel-plugin-prefix');
+prefix.apply(egg, { format: fn });
+egg.info('egg');
 
-var a = require('./moduleA');
-var b = require('./moduleB');
-var c = require('./moduleC');
-
-log.warn('message from root %s prefixing', 'before');
-
-prefix.apply(log, { template: '[%t] %l (%n):' });
-
-log.warn('message from root %s prefixing', 'after');
-
-a();
-b();
-c();
-
-prefix.apply(log, {
-  template: '[%t] %l:',
-  timestampFormatter: function (date) { return date.toISOString() }
+prefix.apply(egg, {
+  timestampFormatter(date) {
+    return date.toISOString();
+  },
 });
+egg.info('egg');
 
-log.warn('message from root after reapplying');
+chicken.info('chicken');
+log.info('root');
 ```
 
 Output
 ```
-message from root before prefixing
-[16:53:46] WARN (root): message from root after prefixing
-[16:53:46] WARN (root): message from moduleA
-message from moduleB
-[16:53:46] WARN (moduleC): message from moduleC
-[2017-05-29T12:53:46.000Z] WARN: message from root after reapplying
+root
+INFO (chicken): chicken
+[16:53:46] INFO: root
+[16:53:46] INFO: egg
+INFO (egg): egg
+[2017-05-29T12:53:46.000Z] INFO: egg
+INFO (chicken): chicken
+[16:53:46] INFO: root
 ```
