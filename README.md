@@ -127,7 +127,7 @@ Output
 
 ```javascript
 const log = require('loglevel');
-const prefix = require('../lib/loglevel-plugin-prefix');
+const prefix = require('loglevel-plugin-prefix');
 
 prefix.reg(log);
 log.enableAll();
@@ -169,7 +169,7 @@ Output
 
 ```javascript
 const log = require('loglevel');
-const prefix = require('../lib/loglevel-plugin-prefix');
+const prefix = require('loglevel-plugin-prefix');
 
 prefix.reg(log);
 log.enableAll();
