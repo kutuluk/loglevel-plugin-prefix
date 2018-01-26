@@ -19,7 +19,7 @@ log.info('root');
 const egg = log.getLogger('egg');
 egg.info('egg');
 
-const fn = (level, logger) => `${level} (${logger}):`;
+const fn = (level, name) => `${level} (${name}):`;
 
 prefix.apply(egg, { format: fn });
 egg.info('egg');

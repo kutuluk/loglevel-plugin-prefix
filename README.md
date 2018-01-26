@@ -7,7 +7,7 @@ Plugin for [loglevel](https://github.com/pimterry/loglevel) message prefixing.
 ## Installation
 
 ```sh
-npm i loglevel-plugin-prefix --save
+npm install loglevel-plugin-prefix
 ```
 
 ## API
@@ -16,11 +16,11 @@ npm i loglevel-plugin-prefix --save
 
 #### `reg(loglevel)`
 
-This method must be called before any calling the apply method.
+This method registers plugin for loglevel. This method must be called at least once before any call to the apply method. Repeated calls to this method are ignored.
 
 #### Parameters
 
-`loglevel` - the root logger, imported from loglevel package
+`loglevel` - the root logger, imported from loglevel module
 
 #### `apply(logger, options)`
 
@@ -28,36 +28,37 @@ This method applies the plugin to the logger. Before using this method, the `reg
 
 #### Parameters
 
-`logger` - a loglevel logger
+`logger` - any logger of loglevel
 
 `options` - an optional configuration object
 
 ```javascript
 var defaults = {
   template: '[%t] %l:',
-  timestampFormatter: function (date) {
-    return date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1');
-  },
   levelFormatter: function (level) {
     return level.toUpperCase();
   },
   nameFormatter: function (name) {
     return name || 'root';
   },
+  timestampFormatter: function (date) {
+    return date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1');
+  },
   format: undefined
 };
 ```
 
-Plugin formats the prefix using **template** option as a printf-like format. The **template** is a string containing zero or more placeholder tokens. Each placeholder token is replaced with the value from loglevel messages parameters. Supported placeholders are:
+Plugin formats the prefix using `template` option as a printf-like format. The `template` is a string containing zero or more placeholder tokens. Each placeholder token is replaced with the value from loglevel messages parameters. Supported placeholders are:
 
-- `%t` - timestamp of message
 - `%l` - level of message
 - `%n` - name of logger
+- `%t` - timestamp of message
 
-The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functions for formatting corresponding values.
+The `levelFormatter`, `nameFormatter` and `timestampFormatter` is a functions for formatting corresponding values.
 
-Alternatively, you can use **format** option. This is a function that receives formatted values (level, logger, timestamp) and should returns a prefix string. If the format option is present, the template option are ignored.
+Alternatively, you can use `format` option. This is a function that receives formatted values (level, name, timestamp) and should returns a prefix string.
 
+If both `format` and` template` are present in the configuration, the `template` parameter is ignored. When both these parameters are missing in the configuration, the inherited behavior is used.
 
 ## Usage
 
@@ -99,7 +100,7 @@ log.enableAll();
 
 prefix.apply(log, {
   format(level, name, timestamp) {
-    return `${chalk.gray(`[${timestamp}]`)} ${colors[level.toUpperCase()](level)} ${chalk.green(`(${name})`)}`;
+    return `${chalk.gray(`[${timestamp}]`)} ${colors[level.toUpperCase()](level)} ${chalk.green(`(${name}):`)}`;
   },
 });
 
@@ -107,13 +108,14 @@ const critical = log.getLogger('critical');
 
 prefix.apply(critical, {
   format(level, name, timestamp) {
-    return chalk.red(`[${timestamp}] ${level} (${name}):`);
+    return chalk.red.bold(`[${timestamp}] ${level} (${name}):`);
   },
 });
 
 log.trace('trace');
 log.debug('debug');
 critical.info('Something significant happened');
+log.log('log');
 log.info('info');
 log.warn('warn');
 log.error('error');
@@ -125,23 +127,28 @@ Output
 ## Custom options
 
 ```javascript
-import log from 'loglevel';
-import prefix from 'loglevel-plugin-prefix';
+const log = require('loglevel');
+const prefix = require('../lib/loglevel-plugin-prefix');
 
+prefix.reg(log);
 log.enableAll();
 
 prefix.apply(log, {
   template: '[%t] %l (%n) static text:',
-  timestampFormatter(date) { return date.toISOString() },
-  levelFormatter(level) { return level.toUpperCase() },
-  nameFormatter(name) { return name || 'global' }
+  levelFormatter(level) {
+    return level.toUpperCase();
+  },
+  nameFormatter(name) {
+    return name || 'global';
+  },
+  timestampFormatter(date) {
+    return date.toISOString();
+  },
 });
 
 log.info('%s prefix', 'template');
 
-const fn = (level, logger, timestamp) => {
-  return `[${timestamp}] ${label} (${name}) static text:`;
-};
+const fn = (level, name, timestamp) => `[${timestamp}] ${level} (${name}) static text:`;
 
 prefix.apply(log, { format: fn });
 
@@ -182,7 +189,7 @@ log.info('root');
 const egg = log.getLogger('egg');
 egg.info('egg');
 
-const fn = (level, logger) => `${level} (${logger}):`;
+const fn = (level, name) => `${level} (${name}):`;
 
 prefix.apply(egg, { format: fn });
 egg.info('egg');
@@ -203,10 +210,10 @@ Output
 root
 chicken
 INFO (chicken): chicken
-[13:20:24] INFO: root
-[13:20:24] INFO: egg
+[16:53:46] INFO: root
+[16:53:46] INFO: egg
 INFO (egg): egg
 info (egg): egg
 INFO (chicken): chicken
-[13:20:24] INFO: root
+[16:53:46] INFO: root
 ```

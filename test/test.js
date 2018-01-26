@@ -11,14 +11,23 @@ loglevel.enableAll();
 describe('API', () => {
   it('Methods', () => {
     expect(prefix).to.have.property('apply').with.be.a('function');
+    expect(prefix).to.have.property('reg').with.be.a('function');
     expect(prefix).not.to.have.property('noConflict');
   });
 
-  it('Empty arguments', () => {
+  it('Reg: empty arguments', () => {
+    expect(prefix.reg).to.throw(TypeError, 'Argument is not a root logger');
+  });
+
+  it('Reg: incorrect argument', () => {
+    expect(() => prefix.reg('logger')).to.throw(TypeError, 'Argument is not a root logger');
+  });
+
+  it('Apply: empty arguments', () => {
     expect(prefix.apply).to.throw(TypeError, 'Argument is not a logger');
   });
 
-  it('Incorrect argument', () => {
+  it('Apply: incorrect argument', () => {
     expect(() => prefix.apply('logger')).to.throw(TypeError, 'Argument is not a logger');
   });
 });
