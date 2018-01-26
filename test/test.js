@@ -47,7 +47,7 @@ describe('Prefix', () => {
 
     loglevel.info('test');
 
-    expect(spy.calledWith('info (undefined): test')).to.be.true;
+    expect(spy.calledWith('INFO (root): test')).to.be.true;
   });
 
   it('Unformat', () => {
@@ -67,6 +67,9 @@ describe('Prefix', () => {
 
   it('All methods of the previous plugin should be called', () => {
     prefix.apply(loglevel);
+
+    // for warn in apply
+    spy.reset();
 
     loglevel.trace();
     loglevel.debug();

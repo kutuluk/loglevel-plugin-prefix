@@ -9,9 +9,11 @@
     "logger",
     "logging",
     "browser",
+    "node",
     "prefix",
+    "colored",
     "loglevel",
-    "loglevel-plugin"
+    "plugin"
   ],
   "homepage": "https://github.com/kutuluk/loglevel-plugin-prefix",
   "bugs": {
@@ -22,7 +24,7 @@
     "url": "git@github.com:kutuluk/loglevel-plugin-prefix.git"
   },
   "license": "MIT",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "main": "./lib/loglevel-plugin-prefix",
   "scripts": {
     "eslint": "eslint ./lib/loglevel-plugin-prefix.js",
@@ -33,6 +35,7 @@
   },
   "devDependencies": {
     "chai": "^4.1.2",
+    "chalk": "^2.3.0",
     "eslint": "^3.19.0",
     "eslint-config-airbnb-base": "^11.3.2",
     "eslint-plugin-chai-friendly": "^0.3.6",

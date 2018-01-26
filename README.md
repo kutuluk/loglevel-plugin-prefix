@@ -14,9 +14,17 @@ npm i loglevel-plugin-prefix --save
 
 **This plugin is under active development and should be considered as an unstable. No guarantees regarding API stability are made. Backward compatibility is guaranteed only by path releases.**
 
+#### `reg(loglevel)`
+
+This method must be called before any calling the apply method.
+
+#### Parameters
+
+`loglevel` - the root logger, imported from loglevel package
+
 #### `apply(logger, options)`
 
-This method applies the plugin to the logger.
+This method applies the plugin to the logger. Before using this method, the `reg` method must be called, otherwise a warning will be logged. **From the next release, the call apply before reg will throw an error.**
 
 #### Parameters
 
@@ -35,7 +43,8 @@ var defaults = {
   },
   nameFormatter: function (name) {
     return name || 'root';
-  }
+  },
+  format: undefined
 };
 ```
 
@@ -47,18 +56,20 @@ Plugin formats the prefix using **template** option as a printf-like format. The
 
 The **timestampFormatter**, **levelFormatter** and **nameFormatter** is a functions for formatting corresponding values.
 
-Alternatively, you can use **format** option. This is a function with two arguments (level and logger), which should return a prefix string. If the format option is present, the other options are ignored.
+Alternatively, you can use **format** option. This is a function that receives formatted values (level, logger, timestamp) and should returns a prefix string. If the format option is present, the template option are ignored.
+
 
 ## Usage
 
 ### Browser directly
 ```html
 <script src="https://unpkg.com/loglevel/dist/loglevel.min.js"></script>
-<script src="https://unpkg.com/loglevel-plugin-prefix@^0.7/dist/loglevel-plugin-prefix.min.js"></script>
+<script src="https://unpkg.com/loglevel-plugin-prefix@^0.8/dist/loglevel-plugin-prefix.min.js"></script>
 
 <script>
   var logger = log.noConflict();
   var prefixer = prefix.noConflict();
+  prefixer.reg(logger);
   prefixer.apply(logger);
   logger.warn('prefixed message');
 </script>
@@ -69,31 +80,47 @@ Output
 [16:53:46] WARN: prefixed message
 ```
 
-### ES6
+### Node
 ```javascript
-import log from 'loglevel';
-import prefix from 'loglevel-plugin-prefix';
+const chalk = require('chalk');
+const log = require('loglevel');
+const prefix = require('loglevel-plugin-prefix');
 
-prefix.apply(log);
-log.warn('prefixed message');
-```
+const colors = {
+  TRACE: chalk.magenta,
+  DEBUG: chalk.cyan,
+  INFO: chalk.blue,
+  WARN: chalk.yellow,
+  ERROR: chalk.red,
+};
 
-### CommonJS
-```javascript
-var log = require('loglevel');
-var prefix = require('loglevel-plugin-prefix');
+prefix.reg(log);
+log.enableAll();
 
-prefix.apply(log);
-log.warn('prefixed message');
-```
-
-### AMD
-```javascript
-define(['loglevel', 'loglevel-plugin-prefix'], function(log, prefix) {
-  prefix.apply(log);
-  log.warn('prefixed message');
+prefix.apply(log, {
+  format(level, name, timestamp) {
+    return `${chalk.gray(`[${timestamp}]`)} ${colors[level.toUpperCase()](level)} ${chalk.green(`(${name})`)}`;
+  },
 });
+
+const critical = log.getLogger('critical');
+
+prefix.apply(critical, {
+  format(level, name, timestamp) {
+    return chalk.red(`[${timestamp}] ${level} (${name}):`);
+  },
+});
+
+log.trace('trace');
+log.debug('debug');
+critical.info('Something significant happened');
+log.info('info');
+log.warn('warn');
+log.error('error');
 ```
+
+Output
+![output](https://raw.githubusercontent.com/kutuluk/loglevel-plugin-prefix/master/colored.png "output")
 
 ## Custom options
 
@@ -112,35 +139,40 @@ prefix.apply(log, {
 
 log.info('%s prefix', 'template');
 
-const fn = (level, logger) => {
-  const timestamp = new Date().toISOString();
-  const label = level.toUpperCase();
-  const name = logger || 'global';
+const fn = (level, logger, timestamp) => {
   return `[${timestamp}] ${label} (${name}) static text:`;
 };
 
 prefix.apply(log, { format: fn });
 
 log.info('%s prefix', 'functional');
+
+prefix.apply(log, { template: '[%t] %l (%n) static text:' });
+
+log.info('again %s prefix', 'template');
 ```
 
 Output
 ```
 [2017-05-29T12:53:46.000Z] INFO (global) static text: template prefix
 [2017-05-29T12:53:46.000Z] INFO (global) static text: functional prefix
+[2017-05-29T12:53:46.000Z] INFO (global) static text: again template prefix
 ```
 
 ## Option inheritance
 
 ```javascript
-import log from 'loglevel';
-import prefix from 'loglevel-plugin-prefix';
+const log = require('loglevel');
+const prefix = require('../lib/loglevel-plugin-prefix');
 
+prefix.reg(log);
 log.enableAll();
 
 log.info('root');
 
 const chicken = log.getLogger('chicken');
+chicken.info('chicken');
+
 prefix.apply(chicken, { template: '%l (%n):' });
 chicken.info('chicken');
 
@@ -148,21 +180,16 @@ prefix.apply(log);
 log.info('root');
 
 const egg = log.getLogger('egg');
-prefix.apply(egg);
 egg.info('egg');
 
-const fn = (level, logger) => {
-  const label = level.toUpperCase();
-  const name = logger || 'root';
-  return `${label} (${name}):`;
-};
+const fn = (level, logger) => `${level} (${logger}):`;
 
 prefix.apply(egg, { format: fn });
 egg.info('egg');
 
 prefix.apply(egg, {
-  timestampFormatter(date) {
-    return date.toISOString();
+  levelFormatter(level) {
+    return level.toLowerCase();
   },
 });
 egg.info('egg');
@@ -174,11 +201,12 @@ log.info('root');
 Output
 ```
 root
+chicken
 INFO (chicken): chicken
-[16:53:46] INFO: root
-[16:53:46] INFO: egg
+[13:20:24] INFO: root
+[13:20:24] INFO: egg
 INFO (egg): egg
-[2017-05-29T12:53:46.000Z] INFO: egg
+info (egg): egg
 INFO (chicken): chicken
-[16:53:46] INFO: root
+[13:20:24] INFO: root
 ```
