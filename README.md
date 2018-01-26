@@ -100,21 +100,19 @@ log.enableAll();
 
 prefix.apply(log, {
   format(level, name, timestamp) {
-    return `${chalk.gray(`[${timestamp}]`)} ${colors[level.toUpperCase()](level)} ${chalk.green(`(${name}):`)}`;
+    return `${chalk.gray(`[${timestamp}]`)} ${colors[level.toUpperCase()](level)} ${chalk.green(`${name}:`)}`;
   },
 });
 
-const critical = log.getLogger('critical');
-
-prefix.apply(critical, {
+prefix.apply(log.getLogger('critical'), {
   format(level, name, timestamp) {
-    return chalk.red.bold(`[${timestamp}] ${level} (${name}):`);
+    return chalk.red.bold(`[${timestamp}] ${level} ${name}:`);
   },
 });
 
 log.trace('trace');
 log.debug('debug');
-critical.info('Something significant happened');
+log.getLogger('critical').info('Something significant happened');
 log.log('log');
 log.info('info');
 log.warn('warn');
@@ -122,6 +120,7 @@ log.error('error');
 ```
 
 Output
+
 ![output](https://raw.githubusercontent.com/kutuluk/loglevel-plugin-prefix/master/colored.png "output")
 
 ## Custom options
