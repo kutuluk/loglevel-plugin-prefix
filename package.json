@@ -31,7 +31,7 @@
     "eslint": "eslint ./lib/loglevel-plugin-prefix.js",
     "test": "mocha",
     "example": "node ./example/example.js",
-    "uglifyjs": "uglifyjs ./lib/loglevel-plugin-prefix.js -o ./dist/loglevel-plugin-prefix.min.js -c -m",
+    "uglifyjs": "uglifyjs ./lib/loglevel-plugin-prefix.js -m reserved=['Logger'] -o ./dist/loglevel-plugin-prefix.min.js -c -m",
     "build": "npm install && npm run eslint && npm run test && npm run uglifyjs"
   },
   "devDependencies": {
@@ -45,6 +45,6 @@
     "loglevel-plugin-mock": "^0.1.0",
     "mocha": "^3.5.3",
     "sinon": "^2.4.1",
-    "uglify-js": "^3.4.0"
+    "uglify-js": "latest"
   }
 }

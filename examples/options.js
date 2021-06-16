@@ -6,7 +6,7 @@ prefix.reg(log);
 log.enableAll();
 
 prefix.apply(log, {
-  template: '[%t] %l (%n) static text:',
+  template: '[%t] %l (%n) static text %m:',
   timestampFormatter(date) {
     return date.toISOString();
   },
@@ -24,7 +24,7 @@ const fn = (level, name, timestamp) => `[${timestamp}] ${level} (${name}) static
 
 prefix.apply(log, { format: fn });
 
-log.info('%s prefix', 'functional');
+log.info('%s prefix', log);
 
 prefix.apply(log, { template: '[%t] %l (%n) static text:' });
 

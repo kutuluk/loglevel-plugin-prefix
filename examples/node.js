@@ -17,7 +17,7 @@ log.enableAll();
 
 prefix.apply(log, {
   format(level, name, timestamp) {
-    return `${chalk.gray(`[${timestamp}]`)} ${colors[level.toUpperCase()](level)} ${chalk.green(`${name}:`)}`;
+    return `${chalk.gray(`[${timestamp}]`)} ${colors[level.toUpperCase()](level)} ${chalk.green(`${name}:`)}%m`;
   },
 });
 

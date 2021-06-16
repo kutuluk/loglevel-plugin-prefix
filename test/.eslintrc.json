@@ -3,6 +3,9 @@
     "plugins": [
         "chai-friendly"
     ],
+    "parserOptions": {
+        "ecmaVersion": 2018
+    },
     "env": {
         "mocha": true,
         "es6": true
